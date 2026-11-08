@@ -40,15 +40,29 @@ if (synth) {
 export const speechAvailable = !!synth;
 export function currentVoiceName() { return voice ? voice.name : '(browser default)'; }
 
-export function unlockSpeech() {
-  if (!synth || unlocked) return;
-  unlocked = true;
-  if (!voice) choose();
+// iOS only lets a page start speech if speak() is called while handling a real tap. A finger landing
+// (touchstart, which the game's input uses) doesn't count on iPad — the finger lifting (touchend) or a
+// click does. So a silent "unlock" line is spoken on every touchend/click until speech has been heard.
+let lastPrime = 0;
+function prime() {
+  if (!synth || voiceWorks || Date.now() - lastPrime < 500) return;
+  lastPrime = Date.now();
   try {
     const u = new SpeechSynthesisUtterance(' ');
     u.volume = 0;
     synth.speak(u);
   } catch (e) { /* optional */ }
+}
+
+export function unlockSpeech() {
+  if (!synth) return;
+  if (!voice) choose();
+  prime();
+}
+
+if (synth && typeof document !== 'undefined') {
+  const onTap = () => { unlocked = true; if (!voice) choose(); prime(); };
+  for (const type of ['touchend', 'click', 'keydown']) document.addEventListener(type, onTap, { capture: true, passive: true });
 }
 
 let lastCancel = -1e9;
