@@ -51,10 +51,17 @@ export function unlockSpeech() {
   } catch (e) { /* optional */ }
 }
 
+let lastCancel = -1e9;
 function cancel() {
   cancels++;
+  if (synth.speaking || synth.pending) lastCancel = Date.now();
   synth.cancel();
 }
+
+// iPad Safari drops a line that is spoken in the same moment as a cancel(), so after stopping
+// something we wait a tenth of a second before speaking again.
+const AFTER_CANCEL_MS = 120;
+let holdUntil = 0;              // when the line waiting after a cancel will be handed to the voice
 
 /** Queue the pieces of one line with the current voice; `onStart` fires when any of it is heard. */
 function sayParts(parts, mood, onEnd, onStart) {
@@ -85,7 +92,16 @@ export function speak(text, { queue = false, mood = 'calm', onEnd } = {}) {
     if (!queue) cancel();
     let started = false;
     const onStart = () => { started = true; voiceWorks = true; };
-    sayParts(parts, mood, onEnd, onStart);
+    // A fresh line waits out the pause after a cancel; a queued line waits until that line has gone in.
+    const now = Date.now();
+    const wait = queue ? holdUntil - now : AFTER_CANCEL_MS - (now - lastCancel);
+    const mine = cancels;
+    if (wait > 0) {
+      if (!queue) holdUntil = now + wait;
+      setTimeout(() => { if (mine === cancels) sayParts(parts, mood, onEnd, onStart); }, wait + (queue ? 1 : 0));
+    } else {
+      sayParts(parts, mood, onEnd, onStart);
+    }
     // Watch the first line said with an untested voice (queued lines wait behind others, so skip those).
     // Before the first tap nothing can be heard anyway (iOS rule), so don't blame the voice.
     if (voiceWorks || gaveUp || queue || !unlocked) return;
@@ -101,7 +117,7 @@ export function speak(text, { queue = false, mood = 'calm', onEnd } = {}) {
       choose();
       cancel();
       speak(text, { mood, onEnd });
-    }, SILENT_MS);
+    }, SILENT_MS + Math.max(0, wait));
   } catch (e) { if (onEnd) onEnd(); }
 }
 

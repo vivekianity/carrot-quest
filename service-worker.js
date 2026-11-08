@@ -4,7 +4,7 @@
 // No network requests are made except to this site, and only for files not yet cached.
 
 // <files> (written by tools/update-sw.js — do not edit by hand)
-const VERSION = '4cc8dafe5a';
+const VERSION = '308e57efe9';
 const FILES = [
   './',
   'index.html',
@@ -75,6 +75,9 @@ const FILES = [
 const CACHE = `carrot-quest-${VERSION}`;
 // Carrot Quest Baby shares this origin (carrot-quest-baby-*), so only this game's own old caches are removed.
 
+const APP_FILES = new Set(FILES);
+const relPath = (url) => new URL(url).pathname.slice(new URL(self.registration.scope).pathname.length) || './';
+
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
@@ -97,7 +100,9 @@ self.addEventListener('fetch', (event) => {
     if (hit) return hit;
     try {
       const res = await fetch(req);
-      if (res.ok && res.type === 'basic') cache.put(req, res.clone());
+      // Only the game's own files are kept for offline play (not extra pages like speech-test.html,
+      // which would otherwise stay stuck on an old copy).
+      if (res.ok && res.type === 'basic' && APP_FILES.has(relPath(req.url))) cache.put(req, res.clone());
       return res;
     } catch (e) {
       // Offline and not cached: a page in this folder opens the game. (Online, other pages such as
