@@ -5,7 +5,7 @@
 // (private mode, blocked, or Node in the tests) we keep an in-memory copy for this session.
 //
 //  { profiles: [{ id, name, avatar, created }], current: id | null, music, speech,
-//    'p:<id>': { levels, carrotBank, checkpoints, mastery, controlMode, lastLevel, endless,
+//    'p:<id>': { levels, carrotBank, checkpoints, mastery, controls, lastLevel, endless,
 //               wardrobe, stickersSeen } }
 import { normaliseWardrobe } from './engine/shop.js';
 
@@ -52,7 +52,7 @@ export function resetAll() {
 
 // ---- Profiles ------------------------------------------------------------------------------------
 const blankProfileData = () => ({
-  levels: {}, carrotBank: 0, checkpoints: {}, mastery: null, controlMode: 'easy', lastLevel: '1-1', endless: null,
+  levels: {}, carrotBank: 0, checkpoints: {}, mastery: null, controls: null, lastLevel: '1-1', endless: null,
   wardrobe: null, stickersSeen: [],
 });
 
@@ -130,8 +130,10 @@ export const profiles = {
 
 // ---- Settings ------------------------------------------------------------------------------------
 export const settings = {
-  get controlMode() { return data().controlMode === 'classic' ? 'classic' : 'easy'; },
-  set controlMode(v) { update((d) => { d.controlMode = v === 'classic' ? 'classic' : 'easy'; }); },
+  // Classic is the default. Stored as `controls` (only written when the child taps the toggle); the
+  // old `controlMode` key held 'easy' for every profile by default, so it is ignored.
+  get controlMode() { return data().controls === 'easy' ? 'easy' : 'classic'; },
+  set controlMode(v) { update((d) => { d.controls = v === 'easy' ? 'easy' : 'classic'; }); },
   get speech() { return load('speech', true) !== false; },
   set speech(v) { save('speech', !!v); },
   get sound() { return load('sound', true) !== false; },

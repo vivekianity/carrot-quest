@@ -16,7 +16,7 @@ const LAYOUT = {
 };
 
 export class Controls {
-  constructor(scene, mode = 'easy') {
+  constructor(scene, mode = 'classic') {
     this.scene = scene;
     this.mode = mode;
     this.enabled = true;
@@ -103,7 +103,7 @@ export class Controls {
   }
 
   setMode(mode) {
-    this.mode = mode === 'classic' ? 'classic' : 'easy';
+    this.mode = mode === 'easy' ? 'easy' : 'classic';
     this.pointers.clear();
     const classic = this.mode === 'classic';
     Object.values(this.buttons).forEach((b) => b.setVisible(classic));

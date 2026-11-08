@@ -34,7 +34,7 @@ test('progress, checkpoints, settings and learning are saved per profile', () =>
   assert.equal(profiles.current.name, 'Ava');
   progress.complete('1-1', 3, 20);
   checkpoints.set('1-2', { x: 100 });
-  settings.controlMode = 'classic';
+  settings.controlMode = 'easy';
   masteryStore.save({ v: 1, seq: 4, facts: {}, flips: ['4x3'] });
   progress.lastLevel = '1-2';
 
@@ -42,7 +42,7 @@ test('progress, checkpoints, settings and learning are saved per profile', () =>
   assert.equal(progress.bestStars('1-1'), 0);
   assert.equal(progress.isUnlocked('1-2', LEVEL_ORDER), false);
   assert.equal(checkpoints.get('1-2'), null);
-  assert.equal(settings.controlMode, 'easy');
+  assert.equal(settings.controlMode, 'classic');
   assert.equal(masteryStore.load(), null);
   assert.equal(progress.carrotBank, 0);
   assert.equal(progress.lastLevel, '1-1');
@@ -51,7 +51,7 @@ test('progress, checkpoints, settings and learning are saved per profile', () =>
   assert.equal(progress.bestStars('1-1'), 3);
   assert.equal(progress.isUnlocked('1-2', LEVEL_ORDER), true);
   assert.deepEqual(checkpoints.get('1-2'), { x: 100 });
-  assert.equal(settings.controlMode, 'classic');
+  assert.equal(settings.controlMode, 'easy');
   assert.deepEqual(masteryStore.load().flips, ['4x3']);
   assert.equal(progress.carrotBank, 20);
   assert.equal(progress.lastLevel, '1-2');
@@ -137,4 +137,14 @@ test('sticker book: seen stickers are remembered per profile', async () => {
   assert.deepEqual(stickerStore.seen, ['boss-crow', 'table-2']);
   profiles.select(b.id);
   assert.deepEqual(stickerStore.seen, []);
+});
+
+test('controls default to Classic, even for profiles saved with the old default', () => {
+  const p = profiles.create({ name: 'Cleo' });
+  profiles.select(p.id);
+  assert.equal(settings.controlMode, 'classic');
+  settings.controlMode = 'easy';
+  assert.equal(settings.controlMode, 'easy');
+  settings.controlMode = 'classic';
+  assert.equal(settings.controlMode, 'classic');
 });

@@ -76,7 +76,7 @@ Rules:
 
 ## 4. Controls (designed for 7-year-olds on a touchscreen)
 
-Two control modes, chosen in the parent corner (default: **Easy**):
+Two control modes, chosen in the parent corner (default: **Classic**):
 
 - **Easy (auto-run):** Hoppy runs forward automatically and stops by herself in front of challenge blocks.
   The child only taps **anywhere on the right half of the screen to jump**. A longer press = a higher jump.
