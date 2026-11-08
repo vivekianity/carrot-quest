@@ -47,3 +47,10 @@ test('text is tidied so it reads like a person talks', () => {
   assert.equal(speakable('Wow, you’re a star! 🥕'), "Wow, you're a star!");
   assert.equal(speakable('🗺'), '');
 });
+
+test('Siri voices are never picked: iPad lists them but web pages get silence', () => {
+  const voices = [V('Siri Voice 2', 'en-GB'), V('Samantha'), V('Nicky', 'en-US', true, { voiceURI: 'com.apple.speech.synthesis.voice.siri.nicky' })];
+  assert.equal(pickVoice(voices).name, 'Samantha');
+  assert.equal(scoreVoice(V('Siri Female (Enhanced)')), -Infinity);
+  assert.equal(pickVoice([V('Siri Voice 1')]), null, 'no usable voice → browser default');
+});

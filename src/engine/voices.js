@@ -5,23 +5,25 @@
 //  - Only on-device voices (localService). Online voices send the words to a server, and the game
 //    promises no network use. If the device has none, the browser's default is used.
 //  - Never the novelty voices (Bubbles, Zarvox, Whisper…) or the old robotic ones (Fred, Ralph…).
+//  - Never Siri voices: iPad lists them, but web pages can't use them — speech comes out silent.
 //  - Prefer "Premium" / "Enhanced" / "Natural" voices (much more human), then gentle, friendly voices.
 
+const NO_WEB = /siri/i;
 const NOVELTY = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Pipe Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox|Fred|Junior|Ralph|Kathy|Princess|Deranged|Hysterical|Grandma|Grandpa|Eddy|Flo|Reed|Rocko|Sandy|Shelley)\b/i;
 // Friendly, clear voices on Apple devices, Windows and Android (all on-device).
 const FRIENDLY = ['Ava', 'Zoe', 'Samantha', 'Allison', 'Susan', 'Serena', 'Kate', 'Stephanie', 'Martha', 'Karen',
-  'Moira', 'Tessa', 'Fiona', 'Nicky', 'Catherine', 'Siri', 'Libby', 'Sonia', 'Maisie', 'Aria', 'Jenny', 'Emma', 'Hazel', 'Zira'];
-const QUALITY = [[/premium/i, 70], [/enhanced/i, 55], [/natural|neural/i, 55], [/siri/i, 45], [/compact/i, -15]];
+  'Moira', 'Tessa', 'Fiona', 'Nicky', 'Catherine', 'Libby', 'Sonia', 'Maisie', 'Aria', 'Jenny', 'Emma', 'Hazel', 'Zira'];
+const QUALITY = [[/premium/i, 70], [/enhanced/i, 55], [/natural|neural/i, 55], [/compact/i, -15]];
 const LANG = { 'en-GB': 8, 'en-US': 8, 'en-AU': 6, 'en-IE': 6, 'en-NZ': 6, 'en-ZA': 5, 'en-CA': 5, 'en-IN': 4 };
 
 export function isNatural(voice) {
-  return !!voice && /premium|enhanced|natural|neural|siri/i.test(voice.name);
+  return !!voice && /premium|enhanced|natural|neural/i.test(voice.name);
 }
 
 export function scoreVoice(v) {
   const lang = String(v.lang || '').replace('_', '-');
   if (!/^en(-|$)/i.test(lang)) return -Infinity;
-  if (NOVELTY.test(v.name)) return -Infinity;
+  if (NOVELTY.test(v.name) || NO_WEB.test(v.name) || NO_WEB.test(v.voiceURI || '')) return -Infinity;
   if (v.localService === false) return -Infinity;
   let s = LANG[lang] ?? 2;
   for (const [re, pts] of QUALITY) if (re.test(v.name)) s += pts;
