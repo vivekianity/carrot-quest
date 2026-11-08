@@ -73,6 +73,7 @@ const FILES = [
 // </files>
 
 const CACHE = `carrot-quest-${VERSION}`;
+// Carrot Quest Baby shares this origin (carrot-quest-baby-*), so only this game's own old caches are removed.
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
@@ -81,7 +82,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k.startsWith('carrot-quest-') && k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => /^carrot-quest-[0-9a-f]+$/.test(k) && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
