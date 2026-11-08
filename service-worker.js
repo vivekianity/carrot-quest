@@ -93,11 +93,18 @@ self.addEventListener('fetch', (event) => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE);
     // Test links such as ?level=2-1 or ?map are the same page: ignore the query string.
-    const hit = await cache.match(req, { ignoreSearch: true })
-      || (req.mode === 'navigate' ? await cache.match('index.html') : null);
+    const hit = await cache.match(req, { ignoreSearch: true });
     if (hit) return hit;
-    const res = await fetch(req);
-    if (res.ok && res.type === 'basic') cache.put(req, res.clone());
-    return res;
+    try {
+      const res = await fetch(req);
+      if (res.ok && res.type === 'basic') cache.put(req, res.clone());
+      return res;
+    } catch (e) {
+      // Offline and not cached: a page in this folder opens the game. (Online, other pages such as
+      // speech-test.html load normally — they must not be swapped for the game.)
+      const page = req.mode === 'navigate' ? await cache.match('index.html') : null;
+      if (page) return page;
+      throw e;
+    }
   })());
 });
