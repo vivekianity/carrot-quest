@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Carrot Quest">
+  <meta name="theme-color" content="#7cc8f7">
+  <title>Carrot Quest</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <style>
+    html, body {
+      margin: 0; height: 100%; overflow: hidden;
+      /* letterbox colours match the sky above and the dirt below the game */
+      background: linear-gradient(var(--sky, #7cc8f7) 0 50%, var(--ground, #c98a52) 50% 100%);
+      touch-action: none;
+      -webkit-user-select: none; user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    #game {
+      position: fixed;
+      inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      touch-action: none;
+    }
+    canvas { display: block; touch-action: none; }
+    #rotate {
+      display: none; position: fixed; inset: 0; z-index: 10;
+      flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      background: linear-gradient(#bfe6ff, #fdf4d8);
+      font: 700 34px ui-rounded, "SF Pro Rounded", system-ui, sans-serif; color: #6b4424; text-align: center;
+    }
+    #rotate svg { width: min(60vw, 340px); height: auto; }
+    #rotate .tablet { transform-origin: 160px 150px; animation: turn 2.4s ease-in-out infinite; }
+    @keyframes turn { 0%, 25% { transform: rotate(0deg); } 55%, 100% { transform: rotate(-90deg); } }
+    @media (prefers-reduced-motion: reduce) { #rotate .tablet { animation: none; transform: rotate(-90deg); } }
+    @media (orientation: portrait) and (pointer: coarse) { #rotate { display: flex; } }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+
+  <div id="rotate" aria-live="polite">
+    <svg viewBox="0 0 320 300" aria-hidden="true">
+      <path d="M 250 60 A 120 120 0 0 1 280 170" fill="none" stroke="#6b4424" stroke-width="10" stroke-linecap="round" stroke-dasharray="2 20"/>
+      <path d="M 266 172 L 282 186 L 294 166" fill="none" stroke="#6b4424" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <g class="tablet">
+        <rect x="95" y="40" width="130" height="220" rx="22" fill="#fff8e6" stroke="#6b4424" stroke-width="8"/>
+        <rect x="110" y="58" width="100" height="184" rx="10" fill="#9be86a"/>
+        <!-- bunny face on the screen -->
+        <ellipse cx="146" cy="118" rx="10" ry="28" fill="#fff" stroke="#4a3127" stroke-width="4" transform="rotate(-12 146 118)"/>
+        <ellipse cx="174" cy="118" rx="10" ry="28" fill="#fff" stroke="#4a3127" stroke-width="4" transform="rotate(14 174 118)"/>
+        <circle cx="160" cy="160" r="32" fill="#fff" stroke="#4a3127" stroke-width="4"/>
+        <circle cx="149" cy="156" r="4.5" fill="#4a3127"/><circle cx="171" cy="156" r="4.5" fill="#4a3127"/>
+        <ellipse cx="160" cy="168" rx="4" ry="3" fill="#ff7f9c"/>
+        <path d="M 136 186 Q 160 200 184 186 L 184 194 Q 160 208 136 194 Z" fill="#e9443b" stroke="#4a3127" stroke-width="3"/>
+      </g>
+    </svg>
+    <div>Please turn the iPad sideways!</div>
+  </div>
+
+  <script src="lib/phaser.min.js"></script>
+  <script type="module" src="src/main.js"></script>
+  <script>
+    // Offline play (service-worker.js). Browsers only allow service workers on secure (https) sites or localhost.
+    // Add ?nosw to a link to run without it (handy while editing the game).
+    if ('serviceWorker' in navigator && window.isSecureContext && !/[?&]nosw\b/.test(location.search)) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js').catch(() => {}));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "carrot-quest",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Carrot Quest - a times-tables platformer for iPad",
+  "type": "module",
+  "scripts": {
+    "start": "serve -l 8765 .",
+    "test": "node --test",
+    "copy-phaser": "node -e \"require('fs').mkdirSync('lib',{recursive:true});require('fs').copyFileSync('node_modules/phaser/dist/phaser.min.js','lib/phaser.min.js')\""
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "phaser": "^3.90.0",
+    "serve": "^14.2.7"
+  }
+}
